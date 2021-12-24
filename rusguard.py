@@ -36,29 +36,31 @@ class RusGuardApi():
             dateTo = event[0]
             datetime_object = datetime.strptime(dateTo, '%Y-%m-%d %H:%M:%S')
             cursor = self.con.cursor()
-            userExecute = cursor.execute(f"SELECT TableNumber,FirstName,SecondName,LastName FROM [dbo].[Employee] WHERE [_id]='{userID}'")
-            user = userExecute.fetchone()
-            iin = user[0]
-            fullName = f"{user[1]} {user[2]} {user[3]}"
 
-            if message == 'Выход':
-               collect_events.append(
-                    (
-                        iin,
-                        fullName,
-                    0,
-                   datetime_object.strftime("%d.%m.%Y %H:%M:%S"),
-                    todayday
-                ))  
-            elif message == 'Вход':
-                collect_events.append(
-                    (
-                        iin,
-                        fullName,
-                    1,
-                   datetime_object.strftime("%d.%m.%Y %H:%M:%S"),
-                    todayday
-                ))
+            if userID != None:
+                userExecute = cursor.execute(f"SELECT Comment,FirstName,SecondName,LastName FROM [dbo].[Employee] WHERE [_id]='{userID}'")
+                user = userExecute.fetchone()
+                iin = user[0]
+                fullName = f"{user[1]} {user[2]} {user[3]}"
+
+                if message == 'Выход':
+                    collect_events.append(
+                            (
+                                iin,
+                                fullName,
+                            0,
+                        datetime_object.strftime("%d.%m.%Y %H:%M:%S"),
+                            todayday
+                        ))  
+                elif message == 'Вход':
+                    collect_events.append(
+                        (
+                            iin,
+                            fullName,
+                        1,
+                    datetime_object.strftime("%d.%m.%Y %H:%M:%S"),
+                        todayday
+                    ))
 
         return collect_events
 
