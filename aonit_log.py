@@ -55,9 +55,10 @@ class IntegrationAonitLog():
 
     def sendRequestToAonit(self,todayday): 
         try:
+            
             response = requests.get(self.url,headers=self.headers)
             print(self.login,self.password,self.url)
-          
+        
             self.cursor.execute("SELECT * FROM events WHERE created_at = ?;",(todayday,))
             events = self.cursor.fetchall()
           
