@@ -166,7 +166,7 @@ class IntegrationAonitLog():
 
 
             body = body.encode('utf-8')
-            print(body)
+            # print(body)
             response = requests.post(self.url,data=body, headers=self.headers)
             if response.status_code == 200:
                 responseTurple = (response.status_code, response.text,todayday)

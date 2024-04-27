@@ -34,7 +34,7 @@ class RusGuardApi():
             message = event[1]
             userID = event[2]
             dateTo = event[0]
-            datetime_object = datetime.strptime(dateTo, '%Y-%m-%d %H:%M:%S')
+            datetime_object = datetime.strftime(dateTo, '%Y-%m-%d %H:%M:%S')
             cursor = self.con.cursor()
 
             if userID != None:

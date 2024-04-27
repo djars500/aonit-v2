@@ -1,23 +1,37 @@
 {
     "ip_addresses": [
         "http://10.245.12.102/bip-sync/?wsdl",
-        "http://10.245.12.67/bip-sync/?wsdl",
+        "http://10.61.42.29/bip-sync/?wsdl",
         "http://10.245.12.102/bip-sync-wss-gost/?wsdl",
         "http://10.245.12.67/shep/bip-sync-wss-gost/?wsdl"
     ],
-    "selected_ip_address": "http://10.245.12.102/bip-sync-wss-gost/?wsdl",
-    "login": "SKUDSTATISTIKA",
-    "password": "123456statistikatest",
+    "selected_ip_address": "http://10.61.42.29/bip-sync/?wsdl",
+    "login": "SKUDUZHSHYM",
+    "password": "123456uzhprod",
     "gost_path": "C:/Users/djars/Downloads/integracia/skddesktop_pecr/tulkibas_Aa123456/GOSTKNCA_8a39a174946a9c3c76c6956541bf3a08d7c61020.p12",
     "gost_pass": "Aa123456",
     "mac_addresses": [
         "000B3A008192",
         "000B3A008198"
-        
     ],
     "c_base_path": "C:/Program Files/ENT/Server/DB/CBASE.FDB",
-    "aonit_server_ip": "10.243.1.230",
-    "rusguard_server_name":"VDSWIN2K19\\RUSGUARD",
-    "selected_version": "rusguard",
-    "aonit_type": "log"
+    "aonit_server_ip": "127.0.0.1",
+    "rusguard_server_name": "VDSWIN2K19\\RUSGUARD",
+    "hikvision_server_name": "192.168.34.22",
+    "selected_version": "perco",
+    "aonit_type": "log",
+    "perco_host": "10.1.80.200",
+    "year": 2024,
+    "percoweb": {
+        "host": "127.0.0.1",
+        "user": "root",
+        "password": "AAss!@#$",
+        "database": "perco",
+        "port": 49001
+    },
+    "last_process_time": "2024-02-01",
+    "hikvision": {
+        "in": "10.243.184.221",
+        "out": "10.243.184.222"
+    }
 }

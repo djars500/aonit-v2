@@ -1,3 +1,4 @@
+import json
 from win32com.client.dynamic import Dispatch
 import xml.etree.ElementTree as ET
 import datetime
@@ -8,6 +9,8 @@ from datetime import date
 class Perco():
 
     def __init__(self):
+        with open('conf.json') as f:
+            self.data = json.load(f)
         self.oPERCo = Dispatch("PERCo_S20_SDK.ExchangeMain")
         self.domEvent = Dispatch('Msxml2.DOMDocument.6.0')
 
@@ -31,7 +34,8 @@ class Perco():
         myfile.write(mydata)
 
     def connectServer(self):
-        Host = "127.0.0.1"
+        host = self.data['perco_host']
+        Host = host
         Port = "211"
         Login = "ADMIN"
         Pass = ""
@@ -40,7 +44,7 @@ class Perco():
         return iRet
 
 
-    def loadEvents(self,dateGet):
+    def collect_events(self,dateGet):
         today = date.today()
         events = []
         self.connectServer()

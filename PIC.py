@@ -5,9 +5,11 @@ from PyQt5 import QtCore
 from datetime import date, datetime,timedelta
 import sqlite3
 from era import Ent
+from hikvision import HikvisionApi
 from perco import Perco
 from aonit import IntegrationAonit
 from aonit_log import IntegrationAonitLog
+from perco_web import PercoWebApi
 from task_manager import Task
 import json
 from PyQt5 import QtGui
@@ -25,27 +27,34 @@ class MainWindow(QMainWindow):
     def __init__(self): 
         if os.path.exists('conf.json') == False:
             with open('conf.json', 'w+') as f:
-                data = {"ip_addresses": [
-                        "10.245.12.102",
-                        "10.245.12.67"
+                data = {
+                    "ip_addresses": [
+                        "http://10.245.12.102/bip-sync/?wsdl",
+                        "http://10.61.42.29/bip-sync/?wsdl",
+                        "http://10.245.12.102/bip-sync-wss-gost/?wsdl",
+                        "http://10.245.12.67/shep/bip-sync-wss-gost/?wsdl"
                     ],
                     "mac_addresses": [
-                        "000B3A007AE6",
-                        "000B3A007AD8",
-                        "000B3A006E02",
-                        "000B3A007ADA",
-                        "000B3A007AE8",
-                        "000B3A006E04",
-                        "000B3A007AD0",
-                        "000B3A006E1A",
-                        "000B3A006DFC"
+                        "000B3A007AE6"   
                     ],
-                    "selected_ip_address": "10.245.12.67",
+                    "selected_ip_address": "http://10.245.12.102/bip-sync/?wsdl",
                     "gost_pass": "null",
                     "gost_path": "null",
                     "login": "null",
                     "password": "null",
-                    "aonit_server_ip": "127.0.0.1"}
+                    "c_base_path": "C:/Program Files/ENT/Server/DB/CBASE.FDB",
+                    "aonit_server_ip": "127.0.0.1",
+                    "rusguard_server_name":"VDSWIN2K19\\RUSGUARD",
+                    "hikvision_server_name":"192.168.34.22",
+                    "aonit_type": "log",
+                    "selected_version": "perco_web",
+                    "year": 2024,
+                    "last_process_time": "2024-05-04",
+                    "hikvision": {
+                        "in": 0,
+                        "out": 0
+                    }
+                    }
                 json.dump(data,f, ensure_ascii=False, indent=4)
             with open('conf.json') as f:
                 self.data = json.load(f)
@@ -61,6 +70,8 @@ class MainWindow(QMainWindow):
         self.cursor = self.con.cursor()
         self.era = Ent()
         self.rusguard = RusGuardApi()
+        self.hikvision = HikvisionApi()
+        self.perco_web = PercoWebApi()
 
         if self.data['selected_version'] == "perco":
             self.perco = Perco()
@@ -283,12 +294,15 @@ class MainWindow(QMainWindow):
         if today:
             self.cursor.execute("DELETE FROM events WHERE created_at = ?;", (today, ))
             if self.data['selected_version'] == "perco":
-                events = self.perco.loadEvents(today)
+                events = self.perco.collect_events(today)
             elif self.data['selected_version'] == "era":
                 events = self.era.collect_events(today)
             elif self.data['selected_version'] == "rusguard":
                 events = self.rusguard.collect_events(today)
-            
+            elif self.data['selected_version'] == "hikvision":
+                events = self.hikvision.collect_events(today)
+            elif self.data['selected_version'] == "perco_web":
+                events = self.perco_web.collect_events(today)
             
             self.cursor.executemany("INSERT INTO events VALUES (NULL,?,?,?,?,?)", events)
             self.con.commit()
@@ -299,11 +313,15 @@ class MainWindow(QMainWindow):
             self.cursor.execute("DELETE FROM events WHERE created_at = ?;", (todayday, ))
 
             if self.data['selected_version'] == "perco":
-                events = self.perco.loadEvents(todayday)
+                events = self.perco.collect_events(todayday)
             elif self.data['selected_version'] == "era":
                 events = self.era.collect_events(todayday)
             elif self.data['selected_version'] == "rusguard":
                 events = self.rusguard.collect_events(todayday)
+            elif self.data['selected_version'] == "hikvision":
+                events = self.hikvision.collect_events(todayday)
+            elif self.data['selected_version'] == "perco_web":
+                events = self.perco_web.collect_events(todayday)
             
             self.cursor.executemany("INSERT INTO events VALUES (NULL,?,?,?,?,?)", events)
             self.con.commit()
@@ -329,7 +347,8 @@ class MainWindow(QMainWindow):
 
     def start(self):
         self.createBase()
-        
+        if (datetime.now().year != self.data['year']):
+            return
         self.collectDataBtn.clicked.connect(self.collectData)
         self.pushDataBtn.clicked.connect(self.sendData)
         self.createDataBtn.clicked.connect(self.createData)
