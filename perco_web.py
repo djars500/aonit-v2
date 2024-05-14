@@ -36,7 +36,7 @@ class PercoWebApi():
         today = datetime.date()
         cur = self.con.cursor() 
         cur.execute(
-            f"SELECT time_label, event_type, device_id, user_id from event WHERE time_label BETWEEN '{todayday.strftime('%Y-%m-%d')} 00:00:00' AND '{today.strftime('%Y-%m-%d')} 23:59:59' AND event_type = 17 ORDER BY time_label DESC;"
+            f"SELECT time_label, event_type, device_id, user_id from event WHERE time_label BETWEEN '{todayday.strftime('%Y-%m-%d')} 00:00:00' AND '{todayday.strftime('%Y-%m-%d')} 23:59:59' AND event_type = 17 ORDER BY time_label DESC;"
             )
         events = cur.fetchall()
         # print(events, 'get_events')

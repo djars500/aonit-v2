@@ -17,8 +17,8 @@
     "c_base_path": "C:/Program Files/ENT/Server/DB/CBASE.FDB",
     "aonit_server_ip": "127.0.0.1",
     "rusguard_server_name": "VDSWIN2K19\\RUSGUARD",
-    "hikvision_server_name": "192.168.34.22",
-    "selected_version": "perco",
+    "hikvision_server_name": "10.243.184.249",
+    "selected_version": "hikvision",
     "aonit_type": "log",
     "perco_host": "10.1.80.200",
     "year": 2024,
@@ -29,9 +29,10 @@
         "database": "perco",
         "port": 49001
     },
-    "last_process_time": "2024-02-01",
+    "last_process_time": "2024-05-11",
     "hikvision": {
-        "in": "10.243.184.221",
-        "out": "10.243.184.222"
+        "in": "10.243.184.123",
+        "out": "10.243.184.124",
+        "timezone": 0
     }
 }

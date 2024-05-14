@@ -45,14 +45,14 @@ class MainWindow(QMainWindow):
                     "c_base_path": "C:/Program Files/ENT/Server/DB/CBASE.FDB",
                     "aonit_server_ip": "127.0.0.1",
                     "rusguard_server_name":"VDSWIN2K19\\RUSGUARD",
-                    "hikvision_server_name":"192.168.34.22",
+                    "hikvision_server_name":"10.243.184.249",
                     "aonit_type": "log",
                     "selected_version": "perco_web",
                     "year": 2024,
-                    "last_process_time": "2024-05-04",
+                    "last_process_time": "2024-05-27",
                     "hikvision": {
-                        "in": 0,
-                        "out": 0
+                        "in": "10.243.184.221",
+                        "out": "10.243.184.222"
                     }
                     }
                 json.dump(data,f, ensure_ascii=False, indent=4)

@@ -26,9 +26,9 @@ class HikvisionApi():
     
     def get_events_month(self,todayday): 
         # print(todayday)
-        last_month = todayday - timedelta(days=93)
+        last_month = todayday
         cur = self.con.cursor() 
-        cur.execute(f"SELECT employeeID, authDateTime, direction, deviceName, personName, cardNo from attlog WHERE authDate BETWEEN '{last_month.strftime('%Y-%m-%d')}' AND '{todayday.strftime('%Y-%m-%d')}' ORDER BY authDateTime DESC;")
+        cur.execute(f"SELECT employeeID, authDateTime, direction, deviceName, personName, cardNo from attlog WHERE authDate BETWEEN '{last_month.strftime('%Y-%m-%d')}' AND '{last_month.strftime('%Y-%m-%d')}' ORDER BY authDateTime DESC;")
         events = cur.fetchall()
         return events
 
@@ -41,7 +41,7 @@ class HikvisionApi():
         else:
             events = self.get_events(todayday)
         print(todayday)
-        events = self.get_events(todayday)
+        # events = self.get_events(todayday)
 
         
         for event in events:
@@ -50,7 +50,7 @@ class HikvisionApi():
             dateTo = event[1]
             iin = event[5]
             fullName = ''
-            datetime_object = dateTo - timedelta(hours=1)
+            datetime_object = dateTo - timedelta(hours=self.data['hikvision']['timezone'])
             cursor = self.con.cursor()
 
 
