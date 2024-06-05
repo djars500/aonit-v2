@@ -18,10 +18,10 @@
     "aonit_server_ip": "127.0.0.1",
     "rusguard_server_name": "VDSWIN2K19\\RUSGUARD",
     "hikvision_server_name": "10.243.184.249",
-    "selected_version": "hikvision",
+    "selected_version": "era",
     "aonit_type": "log",
     "perco_host": "10.1.80.200",
-    "year": 2024,
+    "year": "2024-12-31",
     "percoweb": {
         "host": "127.0.0.1",
         "user": "root",

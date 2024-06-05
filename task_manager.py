@@ -70,6 +70,10 @@ class Task(threading.Thread):
             print("ПРОВЕРТЕ СЕТЬ")
     
     def sendJob(self):
+        if datetime.now().weekday() < 5:
+            print('Вызодные')
+            return
+
         today = date.today()
         
         last_time = datetime.strptime(self.data['last_process_time'], '%Y-%m-%d').date()
@@ -93,9 +97,11 @@ class Task(threading.Thread):
        
  
     def run(self):
-        if (datetime.now().year != self.data['year']):
+        datetime_obj = datetime.strptime(self.data['year'], '%Y-%m-%d').date()
+
+        if (datetime.now().date() > datetime_obj):
             return
-        schedule.every(20).seconds.do(self.sendJob)
+        schedule.every(55).seconds.do(self.sendJob)
         # schedule.every().hour.at("08:05").do(self.sendJob)
         while not self.is_done: 
             time.sleep(self.delay) 

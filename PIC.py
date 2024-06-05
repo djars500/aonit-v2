@@ -48,11 +48,20 @@ class MainWindow(QMainWindow):
                     "hikvision_server_name":"10.243.184.249",
                     "aonit_type": "log",
                     "selected_version": "perco_web",
-                    "year": 2024,
+                    "year": "2024-12-31",
                     "last_process_time": "2024-05-27",
+                    "perco_host": "10.1.80.200",
+                    "percoweb": {
+                        "host": "127.0.0.1",
+                        "user": "root",
+                        "password": "AAss!@#$",
+                        "database": "perco",
+                        "port": 49001
+                    },
                     "hikvision": {
                         "in": "10.243.184.221",
-                        "out": "10.243.184.222"
+                        "out": "10.243.184.222",
+                        "timezone": 0
                     }
                     }
                 json.dump(data,f, ensure_ascii=False, indent=4)
@@ -72,6 +81,11 @@ class MainWindow(QMainWindow):
         self.rusguard = RusGuardApi()
         self.hikvision = HikvisionApi()
         self.perco_web = PercoWebApi()
+
+        datetime_obj = datetime.strptime(self.data['year'], '%Y-%m-%d').date()
+
+        if (datetime.now().date() > datetime_obj):
+            return
 
         if self.data['selected_version'] == "perco":
             self.perco = Perco()
@@ -346,9 +360,12 @@ class MainWindow(QMainWindow):
         
 
     def start(self):
-        self.createBase()
-        if (datetime.now().year != self.data['year']):
+        datetime_obj = datetime.strptime(self.data['year'], '%Y-%m-%d').date()
+
+        if (datetime.now().date() > datetime_obj):
             return
+        self.createBase()
+        
         self.collectDataBtn.clicked.connect(self.collectData)
         self.pushDataBtn.clicked.connect(self.sendData)
         self.createDataBtn.clicked.connect(self.createData)
