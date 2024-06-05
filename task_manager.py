@@ -70,7 +70,7 @@ class Task(threading.Thread):
             print("ПРОВЕРТЕ СЕТЬ")
     
     def sendJob(self):
-        if datetime.now().weekday() < 5:
+        if datetime.now().weekday() > 5:
             print('Вызодные')
             return
 
