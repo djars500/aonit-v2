@@ -93,7 +93,7 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(QSize(800, 400))             # Устанавливаем размеры
         self.setWindowIcon(QtGui.QIcon('logo.ico'))
         self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
-        self.setWindowTitle("Приложение Интеграций ПИК 1.0") 
+        self.setWindowTitle("Приложение Интеграций ПИК 2.0 @2024") 
         central_widget = QWidget(self)      
         self.setCentralWidget(central_widget)    
         grid_layout = QGridLayout()    

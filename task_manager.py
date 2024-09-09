@@ -69,6 +69,27 @@ class Task(threading.Thread):
         else:
             print("ПРОВЕРТЕ СЕТЬ")
     
+    def sendWeek(self):
+        if datetime.now().weekday() > 5:
+            print('Вызодные')
+            return
+
+        today = date.today()
+        
+        last_time = today - timedelta(days=7)
+        if last_time >= today:
+            self.getJob(today=today)
+            self.sendAonit(today)
+        else:
+            start_date = last_time
+            day = timedelta(days=1)
+            while start_date <= today: 
+                print(start_date)
+                  
+                self.getJob(start_date) 
+                self.sendAonit(start_date)
+                start_date += day
+    
     def sendJob(self):
         if datetime.now().weekday() > 5:
             print('Вызодные')
@@ -101,7 +122,8 @@ class Task(threading.Thread):
 
         if (datetime.now().date() > datetime_obj):
             return
-        schedule.every(55).seconds.do(self.sendJob)
+        schedule.every(2).hours.do(self.sendJob)
+        schedule.every().monday.at("08:30").do(self.sendWeek)
         # schedule.every().hour.at("08:05").do(self.sendJob)
         while not self.is_done: 
             time.sleep(self.delay) 

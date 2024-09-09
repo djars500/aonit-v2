@@ -20,7 +20,7 @@ class HikvisionApi():
     def get_events(self,todayday): 
         # print(todayday)
         cur = self.con.cursor() 
-        cur.execute(f"SELECT employeeID, authDateTime, direction, deviceName, personName, cardNo from attlog WHERE authDate BETWEEN '{todayday.strftime('%Y-%m-%d')} 08:00:00' AND '{todayday.strftime('%Y-%m-%d')} 19:15:00' ORDER BY authDateTime DESC;")
+        cur.execute(f"SELECT employeeID, authDateTime, direction, deviceName, personName, cardNo from attlog WHERE authDate BETWEEN '{todayday.strftime('%Y-%m-%d')} 08:00:00' AND '{todayday.strftime('%Y-%m-%d')} 20:15:00' ORDER BY authDateTime DESC;")
         events = cur.fetchall()
         return events
     
