@@ -1,3 +1,4 @@
+from collections import defaultdict
 import threading
 import time
 from aonit_log import IntegrationAonitLog
@@ -58,6 +59,7 @@ class Task(threading.Thread):
         self.con.commit()
 
     def sendAonit(self, today):
+        print(today)
         if self.data['aonit_type'] == 'log':
             send= self.aonitLog.sendRequestToAonit(today)
         else:     
@@ -68,31 +70,47 @@ class Task(threading.Thread):
             print("Успешно отправлено")
         else:
             print("ПРОВЕРТЕ СЕТЬ")
-    
-    def sendWeek(self):
-        if datetime.now().weekday() > 5:
-            print('Вызодные')
-            return
+            
+    def sendProcced(self):
+        events = self.hikvision.collect_events(processed=True)
+        grouped_by_date = defaultdict(list)
 
-        today = date.today()
+
+        for record in events:
+            date = datetime.strptime(record[3], '%d.%m.%Y %H:%M:%S').date()  # Извлекаем дату из datetime
+            grouped_by_date[date].append(record)
+            self.cursor.execute("DELETE FROM events WHERE created_at = ?;", (date, ))
+            self.con.commit()
+
+            
+        # Вывод сгруппированных данных
+        for date, records in grouped_by_date.items():
+            self.cursor.executemany("INSERT INTO events VALUES (NULL,?,?,?,?,?)", records)
+            self.con.commit()
+            self.sendAonit(date)
+            self.updateSended(records)
+            
+
+    def updateSended(self, records):
+        username = 'sa'
+        password = '123456qA'
         
-        last_time = today - timedelta(days=7)
-        if last_time >= today:
-            self.getJob(today=today)
-            self.sendAonit(today)
-        else:
-            start_date = last_time
-            day = timedelta(days=1)
-            while start_date <= today: 
-                print(start_date)
-                  
-                self.getJob(start_date) 
-                self.sendAonit(start_date)
-                start_date += day
+        server = self.data["hikvision_server_name"]
+        conn = HikvisionApi().connectionToDb(server, 'thirdparty', username, password)
+        cur = conn.cursor() 
+        for record in records:
+            
+            cur.execute(f"""UPDATE attlog SET isSended = 1 
+                        WHERE 
+                        cardNo = '{record[0]}' AND
+                        authDateTime = '{record[3]}';
+                        """)
+            events = cur.commit()
+        return events
     
     def sendJob(self):
         if datetime.now().weekday() > 5:
-            print('Вызодные')
+            print('Выходные')
             return
 
         today = date.today()
@@ -122,8 +140,8 @@ class Task(threading.Thread):
 
         if (datetime.now().date() > datetime_obj):
             return
-        schedule.every(2).hours.do(self.sendJob)
-        schedule.every().monday.at("08:30").do(self.sendWeek)
+        schedule.every(1).hours.do(self.sendJob)
+        schedule.every(5).minutes.do(self.sendProcced)
         # schedule.every().hour.at("08:05").do(self.sendJob)
         while not self.is_done: 
             time.sleep(self.delay) 
