@@ -36,6 +36,25 @@ class HikvisionApi():
         events = cur.fetchall()
         return events
         
+    def updateSended(self, records):
+        username = 'sa'
+        password = '123456qA'
+        
+        server = self.data["hikvision_server_name"]
+        conn = HikvisionApi().connectionToDb(server, 'thirdparty', username, password)
+        cur = conn.cursor() 
+        for record in records:
+            
+            cur.execute(f"""UPDATE attlog SET isSended = 1 
+                        WHERE 
+                        cardNo = '{record[0]}' AND
+                        authDateTime = '{record[3]}';
+                        """)
+            events = cur.commit()
+        return events
+    
+    def get_date_from_data(record):
+        return record[3]
     
     def collect_events(self,todayday=None, processed=False):  
         collect_events = []
@@ -50,7 +69,6 @@ class HikvisionApi():
         for event in events:
             
             message = event[2]
-            door = event[3]
             dateTo = event[1]
             iin = event[5]
             fullName = ''
@@ -59,7 +77,7 @@ class HikvisionApi():
                 todayday = datetime_object.date()
             
 
-            if message == 'IN' and door == self.data['hikvision']['out']:
+            if message == 'OUT':
                 collect_events.append(
                         (
                             iin,
@@ -68,7 +86,7 @@ class HikvisionApi():
                     datetime_object.strftime("%d.%m.%Y %H:%M:%S"),
                         todayday
                     ))  
-            elif message == 'IN' and door == self.data['hikvision']['in']:
+            elif message == 'IN':
                 collect_events.append(
                     (
                         iin,

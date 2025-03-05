@@ -14,6 +14,7 @@ import sqlite3
 from perco_web import PercoWebApi
 
 from rusguard import RusGuardApi
+from secretkey import verify_activation_key
 
 
 
@@ -38,6 +39,19 @@ class Task(threading.Thread):
     
     def done(self): 
         self.is_done = True 
+        
+    def get_device_type(self):
+        if self.data['selected_version'] == "perco":
+            events = self.perco
+        elif self.data['selected_version'] == "era":
+            events = self.era
+        elif self.data['selected_version'] == "rusguard":
+            events = self.rusguard
+        elif self.data['selected_version'] == "hikvision":
+            events = self.hikvision
+        elif self.data['selected_version'] == "perco_web":
+            events = self.perco_web
+        return events
 
     def getJob(self, today):
         # today = date.today()
@@ -72,12 +86,13 @@ class Task(threading.Thread):
             print("ПРОВЕРТЕ СЕТЬ")
             
     def sendProcced(self):
-        events = self.hikvision.collect_events(processed=True)
+        device = self.get_device_type()
+        events = device.collect_events(processed=True)
         grouped_by_date = defaultdict(list)
 
 
         for record in events:
-            date = datetime.strptime(record[3], '%d.%m.%Y %H:%M:%S').date()  # Извлекаем дату из datetime
+            date = datetime.strptime(device.get_date_from_data(record), '%d.%m.%Y %H:%M:%S').date()  # Извлекаем дату из datetime
             grouped_by_date[date].append(record)
             self.cursor.execute("DELETE FROM events WHERE created_at = ?;", (date, ))
             self.con.commit()
@@ -88,7 +103,7 @@ class Task(threading.Thread):
             self.cursor.executemany("INSERT INTO events VALUES (NULL,?,?,?,?,?)", records)
             self.con.commit()
             self.sendAonit(date)
-            self.updateSended(records)
+            device.updateSended(records)
             
 
     def updateSended(self, records):
@@ -136,13 +151,18 @@ class Task(threading.Thread):
        
  
     def run(self):
-        datetime_obj = datetime.strptime(self.data['year'], '%Y-%m-%d').date()
-
-        if (datetime.now().date() > datetime_obj):
-            return
-        schedule.every(1).hours.do(self.sendJob)
-        schedule.every(5).minutes.do(self.sendProcced)
-        # schedule.every().hour.at("08:05").do(self.sendJob)
+        datetime_obj = datetime.strptime(self.data.get('year', '2024-12-31'), '%Y-%m-%d').date()
+        type_auth = self.data.get('type', None)
+        input_key = self.data.get('key', None)
+        if type_auth == 'year':
+            if (datetime.now().date() > datetime_obj):
+                return
+        elif type_auth == 'key':
+            is_valid, message = verify_activation_key(input_key)
+            if not is_valid:
+                return
+        # schedule.every(1).hours.do(self.sendJob)
+        schedule.every(2).minutes.do(self.sendProcced)
         while not self.is_done: 
             time.sleep(self.delay) 
             schedule.run_pending()

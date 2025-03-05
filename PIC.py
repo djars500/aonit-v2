@@ -10,6 +10,7 @@ from perco import Perco
 from aonit import IntegrationAonit
 from aonit_log import IntegrationAonitLog
 from perco_web import PercoWebApi
+from secretkey import verify_activation_key
 from task_manager import Task
 import json
 from PyQt5 import QtGui
@@ -82,10 +83,16 @@ class MainWindow(QMainWindow):
         self.hikvision = HikvisionApi()
         self.perco_web = PercoWebApi()
 
-        datetime_obj = datetime.strptime(self.data['year'], '%Y-%m-%d').date()
-
-        if (datetime.now().date() > datetime_obj):
-            return
+        datetime_obj = datetime.strptime(self.data.get('year', '2024-12-31'), '%Y-%m-%d').date()
+        type_auth = self.data.get('type', None)
+        input_key = self.data.get('key', None)
+        if type_auth == 'year':
+            if (datetime.now().date() > datetime_obj):
+                return
+        elif type_auth == 'key':
+            is_valid, message = verify_activation_key(input_key)
+            if not is_valid:
+                return
 
         if self.data['selected_version'] == "perco":
             self.perco = Perco()
@@ -360,10 +367,17 @@ class MainWindow(QMainWindow):
         
 
     def start(self):
-        datetime_obj = datetime.strptime(self.data['year'], '%Y-%m-%d').date()
+        datetime_obj = datetime.strptime(self.data.get('year', '2024-12-31'), '%Y-%m-%d').date()
+        type_auth = self.data.get('type', None)
+        input_key = self.data.get('key', None)
 
-        if (datetime.now().date() > datetime_obj):
-            return
+        if type_auth == 'year':
+            if (datetime.now().date() > datetime_obj):
+                return
+        elif type_auth == 'key':
+            is_valid, message = verify_activation_key(input_key)
+            if not is_valid:
+                return
         self.createBase()
         
         self.collectDataBtn.clicked.connect(self.collectData)

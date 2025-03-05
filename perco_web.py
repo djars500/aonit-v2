@@ -9,44 +9,49 @@ class PercoWebApi():
             self.data = json.load(f)
         
         if self.data['selected_version'] == "perco_web":
+            self.reconnect()
             
-            self.con = connector.connect(
-                host=self.data['percoweb']['host'],
-                user=self.data['percoweb']['user'],
-                password=self.data['percoweb']['password'],
-                database=self.data['percoweb']['database'],
-                port=self.data['percoweb']['port']
-            )
+    def reconnect(self):
+        if hasattr(self, 'con') and self.con.is_connected():
+            self.con.close()
+        self.con = connector.connect(
+            host=self.data['percoweb']['host'],
+            user=self.data['percoweb']['user'],
+            password=self.data['percoweb']['password'],
+            database=self.data['percoweb']['database'],
+            port=self.data['percoweb']['port'],
+            connection_timeout=80
+        )
     
     
     def get_events(self,todayday): 
-        # print(todayday)
-        print(self.con)
+        self.reconnect()
+        cur = self.con.cursor() 
+        cur.execute(
+            f"SELECT time_label, event_type, device_id, user_id, resource_number from event WHERE time_label BETWEEN '{todayday.strftime('%Y-%m-%d')} 00:00:00' AND '{todayday.strftime('%Y-%m-%d')} 23:59:59' AND event_type = 17 ORDER BY time_label DESC;"
+            )
+        events = cur.fetchall()
+        cur.close()
+        return events
+
+    def get_events_not_proccesed(self): 
+        self.reconnect()
 
         cur = self.con.cursor() 
         cur.execute(
-            f"SELECT time_label, event_type, device_id, user_id from event WHERE time_label BETWEEN '{todayday.strftime('%Y-%m-%d')} 00:00:00' AND '{todayday.strftime('%Y-%m-%d')} 23:59:59' AND event_type = 17 ORDER BY time_label DESC;"
+            f"SELECT time_label, event_type, device_id, user_id, resource_number from event WHERE is_sended != 1 AND event_type = 17 ORDER BY time_label DESC;"
             )
         events = cur.fetchall()
-        # print(events, 'get_events')
+        cur.close()
         return events
-
-    def get_events_month(self,todayday): 
-        # print(todayday)
-        today = datetime.date()
-        cur = self.con.cursor() 
-        cur.execute(
-            f"SELECT time_label, event_type, device_id, user_id from event WHERE time_label BETWEEN '{todayday.strftime('%Y-%m-%d')} 00:00:00' AND '{todayday.strftime('%Y-%m-%d')} 23:59:59' AND event_type = 17 ORDER BY time_label DESC;"
-            )
-        events = cur.fetchall()
-        # print(events, 'get_events')
-        return events
-        
     
-    def collect_events(self,todayday, month=False):  
+    def get_date_from_data(self, record):
+        return record[3]
+    
+    def collect_events(self,todayday=None, processed=False):  
         collect_events = []
-        if month:
-            events = self.get_events_month(todayday)
+        if processed:
+            events = self.get_events_not_proccesed()
         else:
             events = self.get_events(todayday)
         
@@ -55,6 +60,7 @@ class PercoWebApi():
             message = event[2]
             userID = event[3]
             dateTo = event[0]
+            resource = event[4]
             datetime_object = datetime.strftime(dateTo, "%d.%m.%Y %H:%M:%S")
             cursor = self.con.cursor()
 
@@ -69,7 +75,7 @@ class PercoWebApi():
                     pass
                     # print(userID, e, event)
 
-                if message == 2:
+                if resource == 2:
                     collect_events.append(
                             (
                                 iin,
@@ -78,7 +84,7 @@ class PercoWebApi():
                         datetime_object,
                             todayday
                         ))  
-                elif message == 1:
+                elif resource == 1:
                     collect_events.append(
                         (
                             iin,
@@ -89,6 +95,16 @@ class PercoWebApi():
                     ))
         return collect_events
 
+    def updateSended(self, records):
+        self.reconnect()
+        cur = self.con.cursor()
+        for record in records:
+            cur.execute(f"""UPDATE event SET is_sended = 1 
+                        WHERE 
+                        event_type = 17 AND
+                        time_label = '{datetime.strptime(record[3], '%d.%m.%Y %H:%M:%S').strftime("%Y.%m.%d %H:%M:%S")}';
+                        """)
+            self.con.commit()
 
 
 
