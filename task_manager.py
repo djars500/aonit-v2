@@ -35,6 +35,7 @@ class Task(threading.Thread):
         if self.data['selected_version'] == "perco":
             self.perco = Perco()
         self.is_done = False 
+
        
     
     def done(self): 
@@ -90,6 +91,8 @@ class Task(threading.Thread):
         events = device.collect_events(processed=True)
         grouped_by_date = defaultdict(list)
 
+        if (len(events) == 0):    
+            print('No event')
 
         for record in events:
             date = datetime.strptime(device.get_date_from_data(record), '%d.%m.%Y %H:%M:%S').date()  # Извлекаем дату из datetime
@@ -104,7 +107,7 @@ class Task(threading.Thread):
             self.con.commit()
             self.sendAonit(date)
             device.updateSended(records)
-            
+        
 
     def updateSended(self, records):
         username = 'sa'
@@ -161,6 +164,8 @@ class Task(threading.Thread):
             is_valid, message = verify_activation_key(input_key)
             if not is_valid:
                 return
+        else:
+            return
         # schedule.every(1).hours.do(self.sendJob)
         schedule.every(2).minutes.do(self.sendProcced)
         while not self.is_done: 

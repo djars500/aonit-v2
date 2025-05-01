@@ -26,8 +26,6 @@ class Ent():
     def get_mac_adresses(self):
         cur = self.con.cursor() 
         cur.execute(f"select NAME from FB_DVS")
-        events = cur.fetchall()
-        print(events)
     
     def get_events_not_proccesed(self): 
         # print(todayday)

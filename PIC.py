@@ -93,6 +93,8 @@ class MainWindow(QMainWindow):
             is_valid, message = verify_activation_key(input_key)
             if not is_valid:
                 return
+        else:
+            return
 
         if self.data['selected_version'] == "perco":
             self.perco = Perco()
@@ -378,6 +380,8 @@ class MainWindow(QMainWindow):
             is_valid, message = verify_activation_key(input_key)
             if not is_valid:
                 return
+        else:
+            return
         self.createBase()
         
         self.collectDataBtn.clicked.connect(self.collectData)

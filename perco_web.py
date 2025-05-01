@@ -20,7 +20,7 @@ class PercoWebApi():
             password=self.data['percoweb']['password'],
             database=self.data['percoweb']['database'],
             port=self.data['percoweb']['port'],
-            connection_timeout=80
+            connection_timeout=120
         )
     
     
