@@ -61,8 +61,11 @@ class PercoWebApi():
             userID = event[3]
             dateTo = event[0]
             resource = event[4]
-            datetime_object = datetime.strftime(dateTo, "%d.%m.%Y %H:%M:%S")
+            datetime_object = dateTo
             cursor = self.con.cursor()
+            
+            if processed is True:
+                todayday = datetime_object.date()
 
             if userID != None:
                 try:
@@ -81,7 +84,7 @@ class PercoWebApi():
                                 iin,
                                 fullName,
                             0,
-                        datetime_object,
+                        datetime_object.strftime("%d.%m.%Y %H:%M:%S"),
                             todayday
                         ))  
                 elif resource == 1:
@@ -89,8 +92,8 @@ class PercoWebApi():
                         (
                             iin,
                             fullName,
-                        1,
-                    datetime_object,
+                            1,
+                        datetime_object.strftime("%d.%m.%Y %H:%M:%S"),
                         todayday
                     ))
         return collect_events
