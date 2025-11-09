@@ -88,8 +88,10 @@ class Task(threading.Thread):
 
         if send['code'] == 200:
             print("Успешно отправлено")
+            return 200
         else:
             print("ПРОВЕРТЕ СЕТЬ")
+            return 500
             
     def sendProcced(self):
         device = self.get_device_type()
@@ -110,8 +112,9 @@ class Task(threading.Thread):
         for date, records in grouped_by_date.items():
             self.cursor.executemany("INSERT INTO events VALUES (NULL,?,?,?,?,?)", records)
             self.con.commit()
-            self.sendAonit(date)
-            device.updateSended(records)
+            status = self.sendAonit(date)
+            if status == 200:
+                device.updateSended(records)
         
 
     def updateSended(self, records):
