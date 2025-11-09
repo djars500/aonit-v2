@@ -15,7 +15,7 @@ from perco_web import PercoWebApi
 
 from rusguard import RusGuardApi
 from secretkey import verify_activation_key
-
+from zkteco import Zkteco
 
 
 class Task(threading.Thread):
@@ -31,6 +31,7 @@ class Task(threading.Thread):
         self.era = Ent()
         self.hikvision = HikvisionApi()
         self.perco_web = PercoWebApi()
+        self.zkteco = Zkteco()
         self.rusguard = RusGuardApi()
         if self.data['selected_version'] == "perco":
             self.perco = Perco()
@@ -52,6 +53,8 @@ class Task(threading.Thread):
             events = self.hikvision
         elif self.data['selected_version'] == "perco_web":
             events = self.perco_web
+        elif self.data['selected_version'] == "zkteco":
+            events = self.zkteco
         return events
 
     def getJob(self, today):
@@ -68,6 +71,8 @@ class Task(threading.Thread):
             events = self.hikvision
         elif self.data['selected_version'] == "perco_web":
             events = self.perco_web
+        elif self.data['selected_version'] == "zkteco":
+            events = self.zkteco
         new_events = events.collect_events(today)
 
         self.cursor.executemany("INSERT INTO events VALUES (NULL,?,?,?,?,?)", new_events)
@@ -167,8 +172,9 @@ class Task(threading.Thread):
         else:
             return
         # schedule.every(1).hours.do(self.sendJob)
-        schedule.every(2).minutes.do(self.sendProcced)
-        while not self.is_done: 
+        # schedule.every(2).minutes.do(self.sendProcced)
+        schedule.every(1).minutes.do(self.sendProcced)
+        while not self.is_done:
             time.sleep(self.delay) 
             schedule.run_pending()
            

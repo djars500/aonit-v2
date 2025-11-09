@@ -16,11 +16,7 @@ import json
 from PyQt5 import QtGui
 import os.path
 from rusguard import RusGuardApi
-
-
-
-
-
+from zkteco import Zkteco
 
 
 class MainWindow(QMainWindow):
@@ -82,6 +78,7 @@ class MainWindow(QMainWindow):
         self.rusguard = RusGuardApi()
         self.hikvision = HikvisionApi()
         self.perco_web = PercoWebApi()
+        self.zkteco = Zkteco()
 
         datetime_obj = datetime.strptime(self.data.get('year', '2024-12-31'), '%Y-%m-%d').date()
         type_auth = self.data.get('type', None)
@@ -326,6 +323,8 @@ class MainWindow(QMainWindow):
                 events = self.hikvision.collect_events(today)
             elif self.data['selected_version'] == "perco_web":
                 events = self.perco_web.collect_events(today)
+            elif self.data['selected_version'] == "zkteco":
+                events = self.zkteco.collect_events(today)
             
             self.cursor.executemany("INSERT INTO events VALUES (NULL,?,?,?,?,?)", events)
             self.con.commit()
@@ -345,6 +344,8 @@ class MainWindow(QMainWindow):
                 events = self.hikvision.collect_events(todayday)
             elif self.data['selected_version'] == "perco_web":
                 events = self.perco_web.collect_events(todayday)
+            elif self.data['selected_version'] == "zkteco":
+                events = self.zkteco.collect_events(todayday)
             
             self.cursor.executemany("INSERT INTO events VALUES (NULL,?,?,?,?,?)", events)
             self.con.commit()
