@@ -35,7 +35,7 @@
     "aonit_server_ip": "127.0.0.1",
     "rusguard_server_name": "VDSWIN2K19\\RUSGUARD",
     "hikvision_server_name": "192.168.8.208",
-    "selected_version": "hikvision",
+    "selected_version": "zkteco",
     "aonit_type": "log",
     "perco_host": "10.1.80.200",
     "year": "2025-12-31",
@@ -53,5 +53,9 @@
         "in": "1",
         "out": "0",
         "timezone": 0
+    },
+    "zkteco": {
+        "in_doors": ["NAZ5252400033"],
+        "out_doors": ["NAZ5252400026"]
     }
 }

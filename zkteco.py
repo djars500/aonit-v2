@@ -1,6 +1,7 @@
 import pyodbc
-from datetime import datetime,date,timedelta
+from datetime import datetime,date, time,timedelta, timezone
 import json
+import psycopg2
 
 class Zkteco():
     def __init__(self):
@@ -8,30 +9,31 @@ class Zkteco():
             self.data = json.load(f)
         
         if self.data['selected_version'] == "zkteco":
-            self.con = pyodbc.connect(
-                'Driver={PostgreSQL Unicode};'
-                'Server=localhost;'
-                'Port=7496;'
-                'Database=biotime;'
-                'Uid=postgres;'
-                'Pwd=admin123;'
+            self.con = psycopg2.connect(
+                host="localhost",
+                port=7496,
+                dbname="biotime",
+                user="postgres",
+                password="admin123"
             )
 
-    def get_events(self,todayday): 
+    def get_events(self, todayday): 
         cur = self.con.cursor()
-        start_datetime = datetime.combine(todayday, datetime.min.time()).replace(hour=2)
-        end_datetime = datetime.combine(todayday, datetime.min.time()).replace(hour=23, minute=59)
+        tz_kz = timezone(timedelta(hours=5))
+
+        start_datetime = datetime.combine(todayday, time(2, 0, 0), tzinfo=tz_kz)
+        end_datetime = datetime.combine(todayday, time(23, 59, 0), tzinfo=tz_kz)
         query = """
                 SELECT emp_id, punch_time, terminal_sn, terminal_alias
                 FROM iclock_transaction
-                WHERE punch_time BETWEEN ? AND ?
+                WHERE punch_time BETWEEN %s AND %s
                 ORDER BY punch_time DESC;
                 """
-
-        # Используем параметры вместо вставки строк
+        # Используем параметры через %s
         cur.execute(query, (start_datetime, end_datetime))
         events = cur.fetchall()
         return events
+
 
     
     def get_events_not_proccesed(self): 
@@ -50,13 +52,13 @@ class Zkteco():
             iin = record[0]
             cur.execute(f"select id from personnel_employee where nickname='{iin}'")
             user = cur.fetchone()
-
-            cur.execute(f"""UPDATE iclock_transaction SET is_sended = 1 
-                        WHERE 
-                        emp_id = '{user[0]}' AND
-                        punch_time = '{datetime.strptime(record[3], '%d.%m.%Y %H:%M:%S').strftime("%Y.%m.%d %H:%M:%S")}';
-                        """)
-            self.con.commit()
+            if user is not None:
+                cur.execute(f"""UPDATE iclock_transaction SET is_sended = 1 
+                            WHERE 
+                            emp_id = '{user[0]}' AND
+                            punch_time = '{datetime.strptime(record[3], '%d.%m.%Y %H:%M:%S').strftime("%Y.%m.%d %H:%M:%S")}';
+                            """)
+                self.con.commit()
 
     def collect_events(self,todayday=None,processed=False):  
         collect_events = []
@@ -73,8 +75,9 @@ class Zkteco():
             dateTo = event[1]
             user_info = self.get_iin_by_employee_id(event[0])
             iin = user_info[2]
-            fullName = user_info[0] + ' ' + user_info[1]
-            datetime_object = dateTo.replace(tzinfo=None).strftime('%Y-%m-%d %H:%M:%S')
+            fullName = f"{user_info[0]} {user_info[1]}"
+            tz_kz = timezone(timedelta(hours=5))
+            datetime_object = event[1].astimezone(tz_kz).replace(tzinfo=None)
             if door in in_doors:
                 direction = 1
             elif door in out_doors:
@@ -98,19 +101,15 @@ class Zkteco():
 
 
     def get_iin_by_employee_id(self, emp_id):
-        """
-        Получает ИИН сотрудника по его employeeID из таблицы users.
-        Возвращает None, если не найдено.
-        """
         if not emp_id:
             return None
-
         try:
             cur = self.con.cursor()
-            query = "SELECT last_name, first_name, nickname FROM personnel_employee WHERE id = ?"
+            query = "SELECT last_name, first_name, nickname FROM personnel_employee WHERE id = %s"
             cur.execute(query, (emp_id,))
             result = cur.fetchone()
-            return result if result and result else None
+            return result if result else None
         except Exception as e:
             print(f"Ошибка при получении ИИН по employeeID={emp_id}: {e}")
             return ''
+

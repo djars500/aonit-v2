@@ -1,0 +1,8 @@
+{
+    "python.defaultInterpreterPath": "c:\\users\\admin\\documents\\aonit-v2\\env\\Scripts\\python.exe",
+    "python.analysis.extraPaths": [
+        "c:\\users\\admin\\documents\\aonit-v2\\env\\Lib\\site-packages"
+    ],
+    "python.analysis.autoSearchPaths": true,
+    "python.analysis.useLibraryCodeForTypes": true
+}
